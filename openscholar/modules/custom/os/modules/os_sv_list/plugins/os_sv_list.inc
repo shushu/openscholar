@@ -5,6 +5,10 @@ class os_sv_list extends os_boxes_default {
   private $plugins = array();
   protected $entity_type;
   protected $bundle;
+
+  public $embed_as = array(
+    'iframe',
+  );
   
   public function __construct() {
     parent::__construct();
@@ -203,6 +207,9 @@ class os_sv_list extends os_boxes_default {
         'element' => $this->pager_element,
         'quantity' => $this->options['number_of_items'],
       ));
+      
+      drupal_add_library('system', 'drupal.ajax');
+      drupal_add_js(drupal_get_path('module', 'os_sv_list'). '/os_sv_list_display.js');      
       
       //if the pager is active, the more link needs its vars to know whether or not to display.
       global $pager_page_array, $pager_total;

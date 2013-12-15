@@ -255,7 +255,7 @@ function os_events_generate_modal_register_link($nid, $modal_settings = array())
   );
   drupal_add_js($modal_style, 'setting');
 
-  return ctools_ajax_text_button(t('Register'), 'os_events/js/registration/' . $nid, '', 'ctools-use-modal ctools-modal-events-modal-style register');
+  return ctools_ajax_text_button(t('Sign up for this event'), 'os_events/js/registration/' . $nid, '', 'ctools-use-modal ctools-modal-events-modal-style register');
 }
 
 /**
@@ -286,7 +286,7 @@ function os_events_events_register($js, $node) {
 
   $output = ctools_modal_form_render($form_state, $registration_form);
   print ajax_render($output);
-  exit;
+  drupal_exit();
 }
 
 /**
@@ -745,7 +745,7 @@ function os_events_modal_submit($form, $form_state) {
   drupal_get_messages();
 
   print ajax_render($commands);
-  exit;
+  drupal_exit();
 }
 
 /**

@@ -6,6 +6,11 @@
  */
 class os_boxes_rss extends os_boxes_default {
 
+  public $embed_as = array(
+    'iframe',
+    'oembed',
+  );
+
   /**
    * Implementation of boxes_content::options_defaults().
    */

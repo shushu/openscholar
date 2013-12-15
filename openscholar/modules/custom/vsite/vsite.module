@@ -98,16 +98,17 @@ function vsite_cron() {
 /**
  * Implements hook_og_membership_insert().
  *
- * Make the "support team" and admin member of the group.
  */
 function vsite_og_membership_insert(OgMembership $og_membership) {
-  if ($og_membership->entity_type != 'user' || $og_membership->type != 'support_expire') {
-    // Not a "support team" membership.
+  if ($og_membership->entity_type != 'user') {
+    // Not a user membership.
     return;
   }
 
+  // Grant a vsite user role or a support team role according to the membership.
   $og_role = og_roles($og_membership->group_type, NULL, $og_membership->gid);
-  $rid = array_search('vsite admin', $og_role);
+  $role_name = $og_membership->type == 'support_expire' ? 'vsite admin' : 'vsite user';
+  $rid = array_search($role_name, $og_role);
   og_role_grant($og_membership->group_type, $og_membership->gid, $og_membership->etid, $rid);
 }
 
@@ -443,7 +444,7 @@ function vsite_node_delete($node) {
 function vsite_form_os_settings_form_alter(&$form, &$form_state, $form_id){
 
   $subsite_bundles = variable_get('subsite_bundles',array('personal','project'));
-  $subsite_parents = variable_get('subsite_parents',array('department'));
+  $subsite_parents = variable_get('subsite_parents',array('department', 'project'));
 
   $subsite_ref_field = field_info_field('field_group_parent');
   if(!$subsite_ref_field){
@@ -591,7 +592,7 @@ function vsite_user_presave(&$edit, $account, $category) {
   foreach ($role_names  as $role_name) {
     $role = user_role_load_by_name($role_name);
     if (!empty($edit['roles'][$role->rid])) {
-      throw new Exception('User object cannot be saved with "vsite admin" role.');
+      throw new Exception(format_string('User object cannot be saved with @name role.', array('@name' => $role_name)));
     }
   }
 }
@@ -875,7 +876,6 @@ function vsite_field_attach_create_bundle($entity_type, $bundle){
 
       if ($type == 'group') {
         vsite_attach_fields_to_group($bundle);
-        vsite_set_og_permissions($bundle);
       }
       else {
         // Group content.
@@ -2726,7 +2726,7 @@ function vsite_cp_settings() {
   if (!$vsite || !isset($vsite->group->type)) {
     return;
   }
-  $default = array('department');
+  $default = array('department', 'project');
   $subsite_parents = variable_get('subsite_parents', $default);
   if (!in_array($vsite->group->type, $subsite_parents)) {
     return;
@@ -2789,6 +2789,85 @@ function vsite_redirect_load_by_source_alter(&$redirects, $source, $context) {
     // Removes this redirect if it's mismatched (prevents the redirect).
     if ($vsite_mismatch) {
       unset($redirects[$key]);
+    }
+  }
+}
+
+/**
+ * Implements hook_og_default_roles_alter().
+ */
+function vsite_og_default_roles_alter(&$roles) {
+  $roles = array(
+    'vsite user',
+    'vsite admin',
+    'content editor',
+  );
+}
+
+/**
+ * Implements hook_og_permission_alter().
+ */
+function vsite_og_permission_alter(&$perms) {
+  foreach ($perms as &$perm) {
+    $perm['default role'] = array('vsite admin');
+  }
+
+  // Get all node related permissions.
+  $node_perms = array();
+  foreach (node_permissions_get_configured_types() as $type) {
+    $node_perms = array_merge($node_perms, og_list_permissions($type));
+  }
+
+  // Grant permissions for vsite user and content editor.
+  foreach ($node_perms as $perm_name => $node_perm) {
+    // Remove "member" from default roles if needed.
+    if ($key = array_search(OG_AUTHENTICATED_ROLE, $perms[$perm_name]['default role'])) {
+      unset($perms[$perm_name]['default role'][$key]);
+    }
+
+    // Do not grant "delete any" permissions.
+    if (strpos($perm_name, 'delete any') !== FALSE) {
+      continue;
+    }
+
+    // Content editor can edit any content except feed and feed importer content types.
+    if ((strpos($perm_name, 'update any') !== FALSE)) {
+      if (strpos($perm_name, 'feed') == FALSE) {
+        $perms[$perm_name]['default role'][] = 'content editor';
+      }
+    }
+    else {
+      $perms[$perm_name]['default role'][] = 'vsite user';
+      $perms[$perm_name]['default role'][] = 'content editor';
+    }
+  }
+
+  // Add editional permissions to vsite user and content editor.
+  $perms['view users outside groups']['default role'][] = 'vsite user';
+  $perms['unsubscribe']['default role'][] = 'vsite user';
+  $perms['view users outside groups']['default role'][] = 'content editor';
+  $perms['unsubscribe']['default role'][] = 'content editor';
+}
+
+/**
+ * Implements hook_redirect_hash_alter().
+ */
+function vsite_redirect_hash_alter(&$hash, $redirect) {
+  // Integrates with module `redirect`.
+  // Prevents redirect_validate() from finding false duplicate paths.
+  // @see redirect_hash()
+  if ($vsite = vsite_get_vsite()) {
+    $hash['gid'] = $vsite->id;
+  }
+}
+
+/**
+ * Implements hook_redirect_parse_url_alter().
+ */
+function vsite_redirect_parse_url_alter(&$parsed, $original_url) {
+  if ($vsite = vsite_get_vsite()) {
+    if ($purl = vsite_get_purl()) {
+      $parsed['url'] = "{$purl}/{$parsed['url']}";
     }
   }
 }

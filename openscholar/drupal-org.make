@@ -259,6 +259,7 @@ projects[oembed][patch][] = "http://drupal.org/files/issues/oembed.2134415.wysiw
 
 projects[og][subdir] = "contrib"
 projects[og][version] = 2.4
+projects[og][patch][] = "https://drupal.org/files/issues/2153555-og-role-maintain-on-revert-6.patch"
 
 projects[og_moderation][subdir] = "contrib"
 projects[og_moderation][version] = 2.0
@@ -294,7 +295,7 @@ projects[pinserver][subdir] = "contrib"
 projects[pinserver][type] = module
 projects[pinserver][download][type] = git
 projects[pinserver][download][url] = "git://github.com/openscholar/pinserver.git"
-projects[pinserver][download][tag] = 7.x-3.4.4
+projects[pinserver][download][tag] = 7.x-3.4.5
 
 projects[purl][subdir] = "contrib"
 ;: projects[purl][version] = 1.0-beta1+11-dev

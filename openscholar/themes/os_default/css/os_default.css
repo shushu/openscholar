@@ -166,16 +166,7 @@ text-shadow: 0px -1px 0px rgba(30, 30, 30, 0.25);
 -webkit-border-radius: 4px;
 -moz-border-radius: 4px;
 border-radius: 4px;
-background: rgb(58, 114, 171);
-background: -moz-linear-gradient(90deg, rgb(58, 114, 171) 31%, rgb(58, 139, 171) 100%);
-background: -webkit-linear-gradient(90deg, rgb(58, 114, 171) 31%, rgb(58, 139, 171) 100%);
-background: -o-linear-gradient(90deg, rgb(58, 114, 171) 31%, rgb(58, 139, 171) 100%);
-background: -ms-linear-gradient(90deg, rgb(58, 114, 171) 31%, rgb(58, 139, 171) 100%);
-background: linear-gradient(0deg, rgb(58, 114, 171) 31%, rgb(58, 139, 171) 100%);
--webkit-box-shadow: 0px 1px 1px rgba(50, 50, 50, 0.5);
--moz-box-shadow:    0px 1px 1px rgba(50, 50, 50, 0.5);
-box-shadow:         0px 1px 1px rgba(50, 50, 50, 0.5);
-
+background: #4183c4;
 
 }
 
@@ -325,23 +316,15 @@ margin-right:-3px;
 .logged-in.no-sidebars.page-user #content .delete-link a {
 	padding: 5px 10px;
     border:none;
-	color:#fff;
+	color:#FFFFFF;
 	font-size:13px;
 	font-weight:bold;
-color: rgb(230, 230, 230);
 text-shadow: 0px -1px 0px rgba(30, 30, 30, 0.25);
 -webkit-border-radius: 4px;
 -moz-border-radius: 4px;
 border-radius: 4px;
-background: rgb(210, 20, 20);
-background: -moz-linear-gradient(90deg, rgb(210, 20, 20) 30%, rgb(255, 123, 0) 100%);
-background: -webkit-linear-gradient(90deg, rgb(210, 20, 20) 30%, rgb(255, 123, 0) 100%);
-background: -o-linear-gradient(90deg, rgb(210, 20, 20) 30%, rgb(255, 123, 0) 100%);
-background: -ms-linear-gradient(90deg, rgb(210, 20, 20) 30%, rgb(255, 123, 0) 100%);
-background: linear-gradient(0deg, rgb(210, 20, 20) 30%, rgb(255, 123, 0) 100%);
--webkit-box-shadow: 0px 1px 1px rgba(50, 50, 50, 0.5);
--moz-box-shadow:    0px 1px 1px rgba(50, 50, 50, 0.5);
-box-shadow:         0px 1px 1px rgba(50, 50, 50, 0.5);
+background: #FF3A2D;
+
 }
 
 .pin-button a, 
@@ -354,20 +337,15 @@ fieldset.pin-fieldset legend a,
     border:none;
 	font-size:13px;
 	font-weight:bold;
-color: rgb(230, 230, 230);
-text-shadow: 0px -1px 0px rgba(30, 30, 30, 0.25);
+color: #FFFFFF;
 -webkit-border-radius: 4px;
 -moz-border-radius: 4px;
 border-radius: 4px;
-background: rgb(61, 155, 19);
-background: -moz-linear-gradient(90deg, rgb(61, 155, 19) 30%, rgb(61, 132, 19) 70%);
-background: -webkit-linear-gradient(90deg, rgb(61, 155, 19) 30%, rgb(61, 132, 19) 70%);
-background: -o-linear-gradient(90deg, rgb(61, 155, 19) 30%, rgb(61, 132, 19) 70%);
-background: -ms-linear-gradient(90deg, rgb(61, 155, 19) 30%, rgb(61, 132, 19) 70%);
-background: linear-gradient(180deg, rgb(61, 155, 19) 30%, rgb(61, 132, 19) 70%);
--webkit-box-shadow: 0px 1px 1px rgba(50, 50, 50, 0.5);
--moz-box-shadow:    0px 1px 1px rgba(50, 50, 50, 0.5);
-box-shadow:         0px 1px 1px rgba(50, 50, 50, 0.5);
+background: #4183c4;
+}
+
+.logged-in.no-sidebars.page-user #content .user-add-website {
+background: #3D9B13;
 }
 
 fieldset.pin-fieldset legend, 
@@ -392,6 +370,10 @@ fieldset.pin-fieldset legend,
     padding-left: 0;
 }
 
+
+fieldset#edit-pin-fieldset {
+	background:#F7F7F7;
+}
 
 .profile h3 {
 	margin: -5px -5px 15px;

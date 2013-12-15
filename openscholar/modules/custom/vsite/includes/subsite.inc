@@ -17,7 +17,7 @@ function vsite_subsite_access($op = 'create', $vsite = false){
     $vsite = spaces_get_space();
   }
 
-  $subsite_parents = variable_get('subsite_parents',array('department'));
+  $subsite_parents = variable_get('subsite_parents',array('department', 'project'));
 
   return ($vsite && in_array($vsite->group->type,$subsite_parents) && spaces_access_admin() && user_access("{$op} subsites"));
 }

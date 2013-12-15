@@ -245,19 +245,22 @@ function _os_tour_help() {
 
   // Provides tour for "home".
   if (arg(0) == 'home' && arg(1) === NULL) {
-    $path = drupal_get_path('module', 'os_tour');
-    $tour_info = array(
-      'id' => 'os-tour-home',
-      'title' => 'Take a tour',
-      'attached' => array(
-        'css' => array(
-          "$path/theme/os_tour.home.css",
+    $contexts = context_get();
+    if (!isset($contexts['context']['os_sitewide_front'])) {
+      $path = drupal_get_path('module', 'os_tour');
+      $tour_info = array(
+        'id' => 'os-tour-home',
+        'title' => 'Take a tour',
+        'attached' => array(
+          'css' => array(
+            "$path/theme/os_tour.home.css",
+          ),
+          'js' => array(
+            "$path/theme/os_tour.home.js",
+          ),
         ),
-        'js' => array(
-          "$path/theme/os_tour.home.js",
-        ),
-      ),
-    );
+      );
+    }
   }
 
   return $tour_info;

@@ -14,6 +14,11 @@ define('CP_MENU_MINI', 'mini');
 define('CP_MENU_FULL', 'full');
 
 /**
+ * Defines the default maximum number of allowed URL redirects per site.
+ */
+define('CP_REDIRECT_MAX_DEFAULT', 15);
+
+/**
  * Loads an include file based on a $_GET.
  *
  * @see cp_init()
@@ -194,8 +199,7 @@ function cp_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('redirect_edit_form'),
       'access callback' => TRUE,
-      'access callback' => 'redirect_access',
-      'access arguments' => array('create', 'redirect'),
+      'access callback' => 'cp_create_redirect_access',
       'file' => 'redirect.admin.inc',
       'file path' => $path,
     );
@@ -571,7 +575,7 @@ function _cp_app_settings_page_title($feature_name) {
 }
 
 /**
- * Implements hook_form_alter() for redirect_edit_form.
+ * Implements hook_form_FORM_ID_alter() for redirect_edit_form.
  *
  * Modifies purl values if the form is being loaded inside a vsite.
  *
@@ -625,9 +629,50 @@ function cp_form_redirect_edit_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
+ * Implmements hook_form_BASE_FORM_ID_alter() for node_edit_form.
+ */
+function cp_form_node_form_alter(&$form, &$form_state, $form_id) {
+  // Hides the default redirect form section from displaying.
+  _cp_form_alter_remove_redirect_element($form);
+}
+
+/**
+ * Implmements hook_form_FORM_ID_alter() for taxonomy_term_edit_form.
+ */
+function cp_form_taxonomy_form_term_alter(&$form, &$form_state, $form_id) {
+  // Hides the default redirect form section from displaying.
+  _cp_form_alter_remove_redirect_element($form);
+}
+
+/**
+ * Hides the default redirect form section from displaying.
+ *
+ * @see cp_form_node_form_alter()
+ * @see cp_form_taxonomy_form_term_alter()
+ */
+function _cp_form_alter_remove_redirect_element(&$form) {
+  if (isset($form['redirect'])) {
+    $form['redirect']['#access'] = FALSE;
+  }
+}
+
+/**
  * Returns a render array for listing all of this site's redirects.
  */
 function _cp_settings_form_redirects_build($form) {
+  $rids = cp_redirect_get_redirects();
+  $redirects = redirect_load_multiple(array_keys($rids));
+  $build = _cp_settings_redirect_build_element($redirects);
+
+  $form['redirects']['redirects'] += $build;
+  return $form;
+}
+
+/**
+ * Returns an array of redirect IDs for this site.
+ */
+function cp_redirect_get_redirects() {
+  $rids = array();
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'redirect');
   if (module_exists('vsite')) {
@@ -639,12 +684,26 @@ function _cp_settings_form_redirects_build($form) {
     $query->propertyCondition('redirect_options', $match, 'LIKE');
   }
   $result = $query->execute();
-  $rids = $result['redirect'];
-  $redirects = redirect_load_multiple(array_keys($rids));
-  $build = _cp_settings_redirect_build_element($redirects);
+  if (isset($result['redirect'])) {
+    $rids += $result['redirect'];
+  }
 
-  $form['redirects']['redirects'] += $build;
-  return $form;
+  return $rids;
+}
+
+/**
+ * Returns TRUE when the number of current redirects is less than the maximum.
+ */
+function cp_create_redirect_access() {
+  if (!module_exists('redirect')) {
+    return FALSE;
+  }
+  if (!redirect_access('create', 'redirect')) {
+    return FALSE;
+  }
+  $max = variable_get('cp_redirect_max', CP_REDIRECT_MAX_DEFAULT);
+  $rids = cp_redirect_get_redirects();
+  return count($rids) < $max;
 }
 
 /**
@@ -652,12 +711,12 @@ function _cp_settings_form_redirects_build($form) {
  */
 function _cp_settings_redirect_build_element($redirects) {
   $title = t('URL Redirects');
-  // @todo make this display dependent on max # of redirects allowed.
-  $link = l(t('+ Add new redirect'), 'cp/redirect/add');
   $path = drupal_get_path('module', 'cp');
+  $description = t('URL redirects allow you to send users from a non-existing path on your site, to any other URL. You might want to use this to create a short link, or to transition users from an old URL that no longer exists to the new URL. Each site may only have a limited number of URL redirects.');
   $build = array(
-    'add_new' => array(
-      '#markup' => "<div id=\"cp-menu-add-new-redirect\">{$link}</div>",
+    'description' => array(
+      '#markup' => "<p class=\"description\">{$description}</p>",
+      '#weight' => 0,
     ),
     'redirects' => array(
       '#theme' => 'item_list',
@@ -668,6 +727,7 @@ function _cp_settings_redirect_build_element($redirects) {
         'id' => 'cp-menu-redirects-list',
       ),
       '#items' => array(),
+      '#weight' => 2,
     ),
     '#attached' => array(
       'css' => array(
@@ -675,6 +735,15 @@ function _cp_settings_redirect_build_element($redirects) {
       ),
     ),
   );
+
+  // Provides a link to add more redirects if the user hasn't yet hit the max.
+  if (cp_create_redirect_access()) {
+    $link = l(t('+ Add new redirect'), 'cp/redirect/add');
+    $build['add_new'] = array(
+      '#markup' => "<div id=\"cp-menu-add-new-redirect\">{$link}</div>",
+      '#weight' => 1,
+    );
+  }
 
   foreach ($redirects as $redirect) {
     if (!is_object($redirect) || !isset($redirect->rid)) {
@@ -780,3 +849,4 @@ function cp_module_implements_alter(&$implementations, $hook) {
   unset($implementations['cp']);
   $implementations['cp'] = $group;
 }
+

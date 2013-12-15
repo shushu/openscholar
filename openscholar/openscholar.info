@@ -90,6 +90,9 @@ dependencies[] = os_ga
 dependencies[] = os_wysiwyg_link
 dependencies[] = os_tour
 dependencies[] = os_importer
+dependencies[] = citation_distribute
+dependencies[] = os_slideshow
+dependencies[] = os_breadcrumbs
 
 ; Control Panel
 dependencies[] = cp

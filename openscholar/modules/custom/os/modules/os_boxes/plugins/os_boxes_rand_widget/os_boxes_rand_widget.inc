@@ -2,6 +2,10 @@
 
 class os_boxes_rand_widget extends os_boxes_widget_collection {
 
+  public $embed_as = array(
+    'iframe',
+  );
+
   public function render() {
     $block = parent::render();
 

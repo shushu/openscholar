@@ -2,6 +2,9 @@
 
 class os_boxes_accordion extends os_boxes_widget_collection {
 
+  public $embed_as = array(
+    'iframe',
+  );
 
   function render() {
     $output = parent::render();
@@ -23,19 +26,21 @@ class os_boxes_accordion extends os_boxes_widget_collection {
     foreach ($this->options['widgets'] as $k => $w) {
       $block_output = $this->render_widget($k);
       unset($block_output['#theme_wrappers']);
-      $content[$k] = array(
-        '#weight' => $w['weight'],
-        'title' => array(
-          '#prefix' => '<h3>',
-          '#suffix' => '</h3>',
-          '#markup' => $w['title'],
-        ),
-        'body' => array(
-          '#prefix' => '<div class="accordion-panel">',
-          '#suffix' => '</div>',
-          'output' => $block_output,
-        )
-      );
+      if (!empty($block_output)) {
+        $content[$k] = array(
+          '#weight' => $w['weight'],
+          'title' => array(
+            '#prefix' => '<h3>',
+            '#suffix' => '</h3>',
+            '#markup' => $w['title'],
+          ),
+          'body' => array(
+            '#prefix' => '<div class="accordion-panel">',
+            '#suffix' => '</div>',
+            'output' => $block_output,
+          )
+        );
+      }
     }
 
     $output['content'] = drupal_render($content);

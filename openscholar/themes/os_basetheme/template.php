@@ -172,6 +172,13 @@ function os_basetheme_preprocess_node(&$vars) {
       $vars['classes_array'][] = 'event-start';
     }
   }
+  
+  // Event persons, change title markup to h1
+  if ($vars['type'] == 'person') {
+    if (!$vars['teaser'] && $vars['view_mode'] != 'sidebar_teaser') {
+      $vars['title_prefix']['#suffix'] = '<h1 class="node-title">' . $vars['title'] . '</h1>';
+    }
+  }
 }
 
 /**

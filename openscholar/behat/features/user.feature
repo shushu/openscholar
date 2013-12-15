@@ -27,7 +27,7 @@ Feature: User functionality testing.
     Given I am logging in as "john"
       And I visit "john/cp/users/permissions"
      When I click "Edit roles and permissions"
-      And I press "edit-submit"
+      And I press "Confirm"
       And I visit "john/cp/users/permissions"
      Then I should see the button "Save permissions"
 
@@ -45,3 +45,12 @@ Feature: User functionality testing.
     Given I am logging in as "john"
      When I give the user "klark" the role "New Custom Role" in the group "john"
      Then I should verify that the user "klark" has a role of "New Custom Role" in the group "john"
+
+  @api
+  Scenario: Restore default roles and permissions in a VSite.
+    Given I am logging in as "john"
+      And I visit "john/cp/users/roles"
+     When I click "Restore default roles and permissions"
+      And I press "Confirm"
+      And I visit "john/cp/users/roles"
+     Then I should not see the button "Save permissions"

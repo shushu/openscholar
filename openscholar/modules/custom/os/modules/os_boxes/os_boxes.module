@@ -356,7 +356,8 @@ function os_boxes_preprocess_boxes_box(&$variables) {
     unset($variables['block']['controls']);
   }
 
-  if (!empty($variables['block']['embed_link']) && !web_widgets_inside_widget()) {
+  $box = boxes_box_load($variables['block']['delta']);
+  if (!empty($variables['block']['embed_link']) && !empty($box->embed_as) && !web_widgets_inside_widget()) {
     $delta = $variables['block']['delta'];
     $base = url('widget/embed/'.$delta);
 
@@ -366,6 +367,22 @@ function os_boxes_preprocess_boxes_box(&$variables) {
     // Unescape and strip $base_path prefix, leaving q without a leading slash.
     $base = substr(urldecode($request_path), $base_path_len);
 
+    $tab_links = array();
+    foreach ($box->embed_as as $v) {
+      $tab_links[$v] = array(
+        'title' => $box->embed_label($v),
+        'href' => '',
+        'external' => true,
+        'fragment' => $delta.'-'.$v
+      );
+    }
+
+    $purl = '';
+    if (module_exists('vsite') && $vsite = vsite_get_vsite()) {
+      if ($vsite->purl_provider == PURL_VSITE_PATH) {
+        $purl = $vsite->group->purl.'/';
+      }
+    }
 
     $output = array(
       '#attached' => array(
@@ -388,26 +405,7 @@ function os_boxes_preprocess_boxes_box(&$variables) {
         '#suffix' => '</div>',
         'links' => array(
           '#theme' => 'links',
-          '#links' => array(
-            'inline' => array(
-              'title' => 'HTML5',
-              'href' => '',
-              'external' => true,
-              'fragment' => $delta.'-inline',
-            ),
-            'iframe' => array(
-              'title' => 'Iframe',
-              'href' => '',
-              'external' => true,
-              'fragment' => $delta.'-iframe',
-            ),
-            'oembed' => array(
-              'title' => 'URL',
-              'href' => '',
-              'external' => true,
-              'fragment' => $delta.'-oembed',
-            ),
-          )
+          '#links' => $tab_links
         ),
         'inline' => array(
           '#prefix' => '<div id="'.$delta.'-inline">',
@@ -415,6 +413,7 @@ function os_boxes_preprocess_boxes_box(&$variables) {
           '#markup' => web_widgets_render_embed_code('inline', array(
             'path' => $base.'/inline',
           )),
+          '#access' => in_array('inline', $box->embed_as)
         ),
         'iframe' => array(
           '#prefix' => '<div id="'.$delta.'-iframe">',
@@ -422,14 +421,16 @@ function os_boxes_preprocess_boxes_box(&$variables) {
           '#markup' => web_widgets_render_embed_code('iframe', array(
             'path' => url(trim($base, '/').'/iframe', array('absolute' => true)),
           )),
+          '#access' => in_array('iframe', $box->embed_as)
         ),
         'oembed' => array(
           '#prefix' => '<div id="'.$delta.'-oembed">',
           '#suffix' => '</div>',
           '#markup' => theme('web_widgets_embed_code', array(
-            'code' => url('box/'.$delta, array('alias' => TRUE, 'absolute' => TRUE)),
+            'code' => url('box/'.$purl.$delta, array('alias' => true, 'absolute' => true)),
             'style' => 'inline',
-          ))
+          )),
+          '#access' => in_array('oembed', $box->embed_as)
         ),
       )
     );
@@ -446,6 +447,14 @@ function os_boxes_preprocess_web_widgets_inline(&$vars) {
   $vars['script_url'] = url(trim($vars['script_url'], '/'), array(
     'absolute' => true,
   ));
+}
+
+/**
+ * Implements hook_preprocess_web_widgets_iframe.
+ */
+function os_boxes_preprocess_web_widgets_iframe(&$vars) {
+  $vars['content_url'] = $vars['path'];
+  $vars['script_url'] = $GLOBALS['base_url'].'/'.drupal_get_path('module', 'os_boxes').'/misc/os_boxes.resize_parent.js';
 }
 
 /**

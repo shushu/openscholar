@@ -56,3 +56,39 @@ function os_front_preprocess_html(&$vars) {
     $vars['classes_array'][] = 'sitewide-front';
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function os_front_theme() {
+  return array(
+    'os_front_boxcontent_sample' => array(
+      'variables' => array('header' => NULL),
+    ),
+  );
+}
+
+/**
+ *
+ */
+function theme_os_front_boxcontent_sample($variables) {
+  $images = $variables['images'];
+  $items = array();
+  foreach ($images as $image) {
+    $items[] = array(
+      'data' => theme_image($image),
+    );
+  }
+  $header = $variables['header'];
+  $build = array(
+    'header' => array(
+      '#markup' => "<h2>{$header}</h2>",
+    ),
+    'list' => array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+    ),
+  );
+  $output = drupal_render($build);
+  return $output;
+}

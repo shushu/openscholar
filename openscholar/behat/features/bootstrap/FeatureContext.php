@@ -1357,7 +1357,7 @@ class FeatureContext extends DrupalContext {
     }
   }
 
-  /*
+  /**
    * @Then /^I should see the publication "([^"]*)" comes before "([^"]*)"$/
    */
   public function iShouldSeeThePublicationComesBefore($first, $second) {
@@ -1393,7 +1393,7 @@ class FeatureContext extends DrupalContext {
     }
   }
 
-  /*
+  /**
    * @Given /^I make the node "([^"]*)" sticky$/
    */
   public function iMakeTheNodeSticky($title) {

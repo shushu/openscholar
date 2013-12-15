@@ -93,9 +93,15 @@ abstract class os_boxes_widget_collection extends os_boxes_default {
     $links = array();
 
     foreach ($widgets as $k => $t) {
-      $id = 'widget-' . $k;
+      if (strpos($k, 'widget-') === FALSE) {
+        $id = 'widget-' . $k;
+      }
+      else {
+        $id = $k;
+      }
 
       $form['widgets'][$id] = array(
+        '#weight' => $t['weight'],
         'bid' => array(
           '#type' => 'hidden',
           '#default_value' => $t['bid'],
@@ -221,6 +227,6 @@ function os_boxes_widget_collection_table_prerender($element) {  // render the f
   $element['#empty'] = true;
   //$element['#value'] = theme('table', array(), $rows, );
   $element['#theme'] = 'table';
-  drupal_add_tabledrag('widget-list', 'order', 'sibling', 'field-weight');
+  drupal_add_tabledrag('widget-list', 'order', 'sibling', 'widget-weight');
   return $element;
 }

@@ -1379,7 +1379,10 @@ function os_files_file_view($file, $view_mode, $langcode) {
           break;
       
         case 'teaser':
-          $content = array_merge(array('video_thumb' => _os_files_video_thumb($file, 200, 200)), $content);
+          //audio thumbnails are unreliable.  don't use them if we can't offer them consistently.
+          if ($file->filemime == 'video/oembed') {
+            $content = array_merge(array('video_thumb' => _os_files_video_thumb($file, 200, 200)), $content);
+          }
           break;
       }
     }

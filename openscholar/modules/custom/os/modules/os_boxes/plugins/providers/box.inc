@@ -17,20 +17,21 @@ function os_boxes_box_provider($plugin, $url, $matches, $parameters) {
 
   $result = FALSE;
   if ($matches[1] == $GLOBALS['base_url']) {
-    $delta = $matches[2];
+    list($purl, $delta) = explode('/', $matches[2]);
+    if (!$delta) {
+      // single tenant site
+      $delta = $purl;
+    }
+    else {
+      // multi tenant site
+      // activate the space
+      purl_get_normal_path($purl, true);
+    }
+
     $defaults = array('view_mode' => 'full', 'langcode' => NULL);
     $parameters = array_merge($defaults, $parameters);
     $box = boxes_box_load($delta);
-    if (!$box) {
-      $s = db_select('spaces_overrides', 'so')
-        ->fields('so', array('value'))
-        ->condition('object_type', 'boxes')
-        ->condition('object_id', $delta)
-        ->execute()
-        ->fetchField();
-      $box = unserialize($s);
-      $box = boxes_box::factory($box->plugin_key, $box);
-    }
+
     if ($box) {
 
       $block = $box->render();

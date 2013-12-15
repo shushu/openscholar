@@ -538,6 +538,7 @@ ol.search-results li.search-result:last-child {
 /* node person */
  .node-type-person #content-column .node-person h1.node-title {
   font-size: 38px;
+  line-height: 35px;
 }
 
 .node-type-person .node-person .field-name-field-professional-title {
@@ -624,7 +625,6 @@ article.node-teaser.node-person .field-name-field-person-photo ~ .node-content {
 
 .node-teaser.node-person {
   padding: 15px 0 30px;
-  display:table;
 }
 
 

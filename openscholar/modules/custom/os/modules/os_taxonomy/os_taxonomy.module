@@ -522,7 +522,6 @@ function os_taxonomy_og_vocabulary_bundles($vocabulary, $gid) {
   $query->join('og_vocab_relation', 'ogr', 'ogr.vid = ogv.vid');
   $result = $query
     ->fields('ogv')
-    ->condition('ogv.entity_type', 'node')
     ->condition('ogv.vid', $vocabulary)
     ->condition('ogr.gid', $gid)
     ->execute()
@@ -901,16 +900,30 @@ function theme_os_taxonomy_tagged_nodes($variables) {
   $has_children_to_display = (!empty($children) && (is_null($options['max_depth']) || (is_numeric($options['max_depth']) && $options['max_depth'] > $options['cur_depth'])));
 
   // Attaches list of nodes in this term, or empty message if term is root term.
-  $node_count = os_taxonomy_count_attached_nodes($taxonomy_term->tid, $options['bundles']);
-  if ($node_count) {
-    pager_default_initialize($node_count, $tagged_item_per_page);
-    $pager = theme('pager', array('quantity' => $node_count));
+  $entity_count = os_taxonomy_count_attached_entities($taxonomy_term->tid, $options['bundles']);
+  if ($entity_count) {
+    pager_default_initialize($entity_count, $tagged_item_per_page);
+    $pager = theme('pager', array('quantity' => $entity_count));
 
-    $nids = os_taxonomy_list_attached_nodes($taxonomy_term->tid, $options['bundles'], $options['range'], $options['offset']);
+    //restrict bundles not jsut to widget settings, but vocab settings as well.  we want to avoid collated file/node lists when possible.
+    if (($space = spaces_get_space()) && ($v_bundles = os_taxonomy_og_vocabulary_bundles($taxonomy_term->vid, $space->id))) {
+      $v_bundles = array_map(function($o) {return $o->bundle;}, $v_bundles);
+      $options['bundles'] = (empty($options['bundles'])) ? $v_bundles : array_intersect($options['bundles'], $v_bundles);
+    } 
+    
+    $entities = os_taxonomy_list_attached_entities($taxonomy_term->tid, $options['bundles'], $options['range'], $options['offset']);
+    $tid = $taxonomy_term->tid;
+    
+    //this array map is only necessary when entity types are mixed.  would it be more efficient to use the TYPE_load_multiple and TYPE_view_multipe options when the bundles are all within one entity?
+    $build += array_map(function ($a) use ($tid) {
+      $entity = entity_load_single($a['entity_type'], $a['entity_id']);
+      $entity->contextual_annotation_key = 'tid-' . $tid;
+      return entity_view($a['entity_type'], array($entity));
+    }, $entities);
 
-    $nodes = node_load_multiple($nids);
-    array_walk($nodes, create_function('&$n', '$n->contextual_annotation_key = "tid-'.$taxonomy_term->tid.'";'));
-    $build += node_view_multiple($nodes);
+//     $nodes = node_load_multiple($nids);
+//     array_walk($nodes, create_function('&$n', '$n->contextual_annotation_key = "tid-'.$taxonomy_term->tid.'";'));
+//     $build += node_view_multiple($nodes);
   }
   else if ((int) $options['cur_depth'] === 0 && !$has_children_to_display) {
     $pager = '';
@@ -965,7 +978,7 @@ function os_taxonomy_count_term_tagged_items($terms, $node_bundles = array()) {
   $items_number = 0;
 
   foreach ($terms as $term) {
-    $items_number += os_taxonomy_count_attached_nodes($term->tid, $node_bundles);
+    $items_number += os_taxonomy_count_attached_entities($term->tid, $node_bundles);
   }
 
   return $items_number;
@@ -1000,6 +1013,30 @@ function os_taxonomy_count_attached_nodes_query_object($tid, $node_bundles = arr
   return $query;
 }
 
+function os_taxonomy_count_attached_entities_query_object($tid, $bundles = array()) {
+  $query = db_select('field_data_og_vocabulary', 'ogv');
+  $query->condition('og_vocabulary_target_id', $tid)
+    ->distinct()
+    ->fields('ogv', array('entity_type', 'entity_id'));
+
+  //Join node and file_managed as needed so we can sort by sticky and created dates
+  $entities = _os_taxonomy_bundle_entities($bundles);
+  if (empty($bundles) || in_array('file', $entities)) {
+    $query->leftJoin('file_managed', 'fm', '(ogv.entity_type = :file AND ogv.entity_id = fm.fid)', array(':file' => 'file'));
+  }
+  
+  if (empty($bundles) || in_array('node', $entities)) {
+    $query->leftJoin('node', 'n', '(ogv.entity_id = n.nid AND ogv.entity_type = :node)', array(':node' => 'node'));
+  }
+  
+  if (!empty($bundles)) {
+    $query->condition('ogv.bundle', $bundles, 'IN');
+  }
+
+  return $query;
+}
+
+
 /**
  * Count the number of attached node to the taxonomy.
  *
@@ -1027,6 +1064,16 @@ function os_taxonomy_count_attached_nodes($tid, $node_bundles = array()) {
 
   return $count;
 }
+function os_taxonomy_count_attached_entities($tid, $bundles = array()) {
+  $query = os_taxonomy_count_attached_entities_query_object($tid, $bundles);
+
+  if ($og_context = og_context()) {
+    $query->join('og_membership', 'ogm', " ogm.etid = ogv.entity_id");
+    $query->condition("ogm.gid", $og_context['gid']);
+  }
+
+  return $query->countQuery()->execute()->fetchField();
+}
 
 /**
  * Returns an array of node IDs tagged in a given taxonomy term.
@@ -1044,16 +1091,16 @@ function os_taxonomy_count_attached_nodes($tid, $node_bundles = array()) {
  *  @return array $nids
  *    Array of tagged node IDs.
  */
-function os_taxonomy_list_attached_nodes($tid, $node_bundles = array(), $range = NULL, $offset = NULL) {
-  $query = os_taxonomy_count_attached_nodes_query_object($tid, $node_bundles);
+function os_taxonomy_list_attached_entities($tid, $bundles = array(), $range = NULL, $offset = NULL) {
+  $query = os_taxonomy_count_attached_entities_query_object($tid, $bundles);
 
-  $query->orderBy('n.sticky', 'DESC');
   if (module_exists('nodeorder')) {
+    $query->leftJoin('taxonomy_term_data', 't', 'ogv.og_vocabulary_target_id = t.tid');
     $query->orderBy('t.weight', 'ASC');
   }
 
-  if(isset($node_bundles) && count($node_bundles) == 1){
-    switch(current($node_bundles)){
+  if (count($bundles) == 1){
+    switch(current($bundles)){
     	case 'biblio':
     	  $query->leftJoin('biblio', 'b', 'b.vid = n.vid');
     	  $query->orderBy('b.biblio_year', 'DESC');
@@ -1064,21 +1111,37 @@ function os_taxonomy_list_attached_nodes($tid, $node_bundles = array(), $range =
     	  break;
     }
   }
-
-  $query->orderBy('n.created', 'DESC');
-
+    
+  //apply an expensive sort only when it's needed for many bundles.  
+  switch (_os_taxonomy_bundle_entities($bundles)) {
+    case array('node'):
+      $query->orderBy('n.sticky', 'DESC');
+      $query->orderBy('n.created', 'DESC');
+      break;
+      
+    case array('file'):
+      $query->orderBy('fm.timestamp', 'DESC');
+      break;
+      
+    default:
+      //select a date depending on the type of entity, sort by that.  this is slow.
+      $query->addExpression('IF(ogv.entity_type = :node, n.created, fm.timestamp)', 'entity_date', array(':node' => 'node'));
+      $query->orderBy('n.sticky', 'DESC');
+      $query->orderBy('entity_date', 'DESC');      
+      break;
+  }
+  
   if ($range) {
     $query->range($offset, $range);
   }
 
-  $result = $query->execute();
-  $nodes = array();
+  $result = $query->execute();  
+  $entities = array();
   while ($record = $result->fetchAssoc()) {
-    $nodes[$record['nid']] = $record['nid'];
+    $entities[] = array('entity_type' => $record['entity_type'], 'entity_id' => $record['entity_id']);
   }
-
-  $nids = array_keys($nodes);
-  return $nids;
+  
+  return $entities; 
 }
 
 /**
@@ -1205,4 +1268,24 @@ function os_taxonomy_terms_determine_sort($terms) {
   }
 
   return FALSE;
+}
+
+/**
+ * @function _os_taxonomy_bundle_entities()
+ * 
+ * Given a list of bundles, get the entities that use them.  This is to let us
+ * avoid collating files and nodes on a term page unless absolutely necessary.
+ */
+function _os_taxonomy_bundle_entities($bundles = array()) {
+  $ret = array();
+  $bundle_functions = array('node' => 'os_get_bundles', 'file' => 'os_files_get_bundles');
+  
+  foreach ($bundle_functions as $entity => $func) {
+    $entity_bundles = array_keys($func(TRUE));
+    if (array_intersect($entity_bundles, $bundles)) {
+      $ret[] = $entity;
+    }
+  }
+  
+  return $ret;
 }

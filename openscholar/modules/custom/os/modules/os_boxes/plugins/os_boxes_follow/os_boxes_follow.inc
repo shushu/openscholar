@@ -2,6 +2,10 @@
 
 class os_boxes_follow extends os_boxes_default {
 
+  public $embed_as = array(
+    'iframe',
+  );
+
   public function options_defaults() {
     return array(
       'links' => array(),

@@ -57,7 +57,7 @@ function os_profiles_process_node(&$vars) {
   
   // Moves the profile photo thumbnail before teaser title (full name)
   if (isset($vars['content']['field_person_photo'])) {
-    $vars['title_prefix'] = $vars['content']['field_person_photo'];
+    $vars['title_prefix'] += $vars['content']['field_person_photo'];
     unset($vars['content']['field_person_photo']);
   }
 

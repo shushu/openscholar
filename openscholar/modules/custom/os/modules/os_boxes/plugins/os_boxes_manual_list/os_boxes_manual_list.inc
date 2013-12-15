@@ -2,6 +2,11 @@
 
 class os_boxes_manual_list extends os_boxes_default {
 
+  public $embed_as = array(
+    'iframe',
+    'oembed',
+  );
+
   public function options_defaults() {
     return array(
       'nodes' => array(),

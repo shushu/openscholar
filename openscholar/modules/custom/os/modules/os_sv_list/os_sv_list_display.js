@@ -1,13 +1,27 @@
 /**
+ * @file os_sv_list_display.js
  * 
+ * Ajax for sv_list pager
  */
 (function ($) {
   var data = {};
   Drupal.behaviors.os_sv_list = {
     attach: function (ctx) {
     	
-      // add a click handler
+      // add a click handler to lists of posts
       $(ctx).find('.block-boxes-os_sv_list_box', ctx).click(click_handler).each(function () {
+        // save the current page to our cache
+        // get the delta of the box and the page, and store them that way
+        var page_elem = $(this).find('[data-page]'),
+          page = page_elem.attr('data-page'),
+          delta = page_elem.attr('data-delta');
+        
+        data[delta] = {};
+        data[delta][page] = page_elem.parent().html();
+      });
+      
+      // add a click handler to lsits of files
+      $(ctx).find('.block-boxes-os_sv_list_file', ctx).click(click_handler).each(function () {
         // save the current page to our cache
         // get the delta of the box and the page, and store them that way
         var page_elem = $(this).find('[data-page]'),

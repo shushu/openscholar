@@ -8,8 +8,6 @@
 }
 
 
- 
-
 /*--------------------------------------------------------*/
 @media (max-width: 1008px){
 .region-header-first {
@@ -427,7 +425,9 @@ display: block;
     width: 100%;
 }
 
-
+.person-teaser-wrapper {
+display: inline !important;
+}
 
 .file-os-files-large,
 .file-os-files-xlarge,

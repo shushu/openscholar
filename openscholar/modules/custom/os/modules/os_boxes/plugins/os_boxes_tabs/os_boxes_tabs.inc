@@ -10,6 +10,10 @@
  */
 class os_boxes_tabs extends os_boxes_widget_collection {
 
+  public $embed_as = array(
+    'iframe',
+  );
+
   // for backwards compatibility
   public function options_defaults() {
     $options = parent::options_defaults();
