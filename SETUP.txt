@@ -1,14 +1,4 @@
-language: php
 
-php:
-  - 5.4
-
-mysql:
-  database: drupal
-  username: root
-  encoding: utf8
-
-before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - composer global require drush/drush:6.2.0
   # Install apache
@@ -21,19 +11,3 @@ before_script:
   - echo "$(curl -fsSL https://gist.github.com/roderik/2eb301570ed4a1f4c33d/raw/8066fda124b6c86f69ad32a010b8c22bbaf868e8/gistfile1.txt)" | sed -e "s,PATH,`pwd`/www,g" | sudo tee /etc/apache2/sites-available/default > /dev/null
   - sudo service apache2 restart
   - sudo service apache2 reload
-  - "mysql -e 'create database drupal;'"
-  - phpenv rehash
-  - bash scripts/setup
-  - bash scripts/build
-
-  # Install a multi-tanent, development site.
-  - cd www
-  - mkdir -p /tmp
-  - mkdir -p /tmp/devel-mails
-  - mkdir -p sites/default/files
-  - sudo chmod 777 /tmp -R
-  - sudo chmod 777 sites/default -R
-  - time drush si openscholar --account-pass=admin --db-url=mysql://root:@127.0.0.1/drupal openscholar_flavor_form.os_profile_flavor=development openscholar_install_type.os_profile_type=vsite --yes
-  - drush vset purl_base_domain http://127.0.0.1
-  - drush en os_migrate_demo -y
-  - drush mi --all --user=1
