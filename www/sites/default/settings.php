@@ -30,10 +30,10 @@ $conf['404_fast_html'] = '<html xmlns="http://www.w3.org/1999/xhtml"><head><titl
 // Database configuration.
 $databases['default']['default'] = array(
   'driver' => 'mysql',
-  'database' => 'drupal',
+  'database' => 'openscholar2',
   'host' => '127.0.0.1',
   'username' => 'root',
-  'password' => '',
+  'password' => 'root',
   'prefix' => '',
 );
 
