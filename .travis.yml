@@ -8,11 +8,6 @@ mysql:
   username: root
   encoding: utf8
 
-env:
-  - TEST_SUITE=first
-  - TEST_SUITE=last
-
-
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - composer global require drush/drush:6.2.0
@@ -25,27 +20,11 @@ before_script:
   - echo "$(curl -fsSL https://gist.github.com/roderik/16d751c979fdeb5a14e3/raw/74f4fec92c064c4f683fef28a6098caf0f038de7/gistfile1.txt)" | sudo tee /etc/apache2/conf.d/phpconfig > /dev/null
   - echo "$(curl -fsSL https://gist.github.com/roderik/2eb301570ed4a1f4c33d/raw/8066fda124b6c86f69ad32a010b8c22bbaf868e8/gistfile1.txt)" | sed -e "s,PATH,`pwd`/www,g" | sudo tee /etc/apache2/sites-available/default > /dev/null
   - sudo service apache2 restart
-  - sudo sh -c "echo 127.0.1.1	lincoln.local >> /etc/hosts"
-  - sudo sh -c "cat openscholar/behat/lincoln-vhost.txt > /etc/apache2/sites-available/lincoln"
-  - sudo a2ensite lincoln
   - sudo service apache2 reload
   - "mysql -e 'create database drupal;'"
   - phpenv rehash
   - bash scripts/setup
   - bash scripts/build
-
-  # Download and install Apache solr
-  - wget http://wiki.gizra-labs.com/images/e/ee/Apache-solr-3.6.2.zip
-  - unzip -o Apache-solr-3.6.2.zip
-  - cd apache-solr-3.6.2/example/solr/conf
-  # Copy the solr config files from the apache solr module
-  - yes | cp /home/travis/build/openscholar/openscholar/www/profiles/openscholar/modules/contrib/apachesolr/solr-conf/solr-3.x/* .
-  # Copy the modified solrconfig.xml file to commit records every 20 seconds so items will show up in search sooner
-  - yes | cp /home/travis/build/openscholar/openscholar/www/profiles/openscholar/behat/solr/solrconfig.xml .
-  - cd ../../
-  - java -jar start.jar &
-  - sleep 10
-  - cd /home/travis/build/openscholar/openscholar
 
   # Install a multi-tanent, development site.
   - cd www
@@ -58,24 +37,3 @@ before_script:
   - drush vset purl_base_domain http://127.0.0.1
   - drush en os_migrate_demo -y
   - drush mi --all --user=1
-
-  # Index site using Apache solr
-  - drush en os_search_solr -y
-  - drush solr-mark-all
-  - drush solr-index
-  # Trying to execute the internal solr commit
-  - sleep 10
-  - wget http://localhost:8983/solr/update?commit=true
-
-  # Copy Behat configuration file.
-  - cd profiles/openscholar/behat
-  - cp behat.local.yml.travis behat.local.yml
-  - curl -s https://getcomposer.org/installer | php
-  - php composer.phar install --prefer-source
-  - sudo cat /var/log/apache2/error.log
-
-script:
-  - ./bin/behat --tags=$TEST_SUITE
-
-after_script:
-    - sudo cat /var/log/apache2/error.log
