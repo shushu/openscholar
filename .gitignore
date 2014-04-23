@@ -19,8 +19,3 @@ composer.phar
 openscholar/composer.lock
 behat/vendor
 
-#make
-openscholar/1/
-openscholar/libraries/
-openscholar/modules/contrib/
-www/
