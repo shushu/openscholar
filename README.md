@@ -5,22 +5,11 @@
 * open-source
 * designed for the academic community
 
-For a non-technical overview, see the [User Documentation](http://scholar.harvard.edu/help/vsitehelp/User-Documentation)
+## Environment
+1. Basically we should have `mysql`, `apache2` with `actions` and `rewrite` modules enabled, and `drush`.
+2. Detailed installation can be seen in the .travis.yml file.
 
-For developers, see the [glossary](https://github.com/openscholar/openscholar/wiki/Glossary).
 ## Getting Started
-
-1. [Install](https://github.com/openscholar/openscholar/wiki/Install) the Drupal profile ([Troubleshooting](https://github.com/openscholar/openscholar/wiki/Troubleshooting))
-1. [Create an OS Site](https://github.com/openscholar/openscholar/wiki/Create-an-os-site)
-1. [Customize](https://github.com/openscholar/openscholar/wiki/Customize) everything really simply
-1. Repeat steps 2-4
-
-## Get Involved
-
-* [Issues (Github)](https://github.com/openscholar/openscholar/issues)
-* IRC: freenode#openscholar
-* [@OpenScholarApp](http://twitter.com/OpenScholarApp)
-
-## Tutorials
-
-* [How to create an OS App](https://github.com/openscholar/openscholar/wiki/How-to-create-an-os-app)
+1. Clone the ZFS-SCHOLAR-3.12 branch.
+2. Create local database named openscholar with username/password root/root.
+3. Execute `bash default.install.sh`
