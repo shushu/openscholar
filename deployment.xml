@@ -67,8 +67,14 @@
         <parameter display="Database name" id="db_name" readonly="false" required="true" type="string">
 			<defaultvalue>openscholar</defaultvalue>
 		</parameter>
+		<parameter display="Drupal admin password" id="admin_password" readonly="false" required="true" type="password">
+            <defaultvalue></defaultvalue>
+        </parameter>
 		<parameter display="Drupal admin email" id="admin_email" readonly="false" required="true" type="email">
             <defaultvalue>admin@localhost.com</defaultvalue>
+        </parameter>
+		<parameter display="Table prefix" id="table_prefix" readonly="false" required="true" type="string">
+            <defaultvalue>drupal_</defaultvalue>
         </parameter>
     </parameters>
 </package>
