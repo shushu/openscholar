@@ -29,6 +29,7 @@ require_once $appBaseDir . '/includes/password.inc';
 
 // Replace values
 $sqlFile = replace_values($sqlFilePath, array(
+	"@ZEND_DB_TABLE_PREFIX@" => $tablePrefix,
 	"@ADMIN_PASSWORD@" => user_hash_password($adminPassword),
 	"@ADMIN_EMAIL@" => strToHex($adminEmail),
 	"@ZEND_SITE_NAME@" => strToHex($siteName),

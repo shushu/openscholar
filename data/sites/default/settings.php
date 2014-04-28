@@ -34,7 +34,7 @@ $databases['default']['default'] = array(
   'host' => '@ZEND_DB_HOST@',
   'username' => '@ZEND_DB_USERNAME@',
   'password' => '@ZEND_DB_PASSWORD@',
-  'prefix' => '',
+  'prefix' => '@ZEND_DB_TABLE_PREFIX@',
 );
 
 // Use Devel to redirect SMTP to file.
