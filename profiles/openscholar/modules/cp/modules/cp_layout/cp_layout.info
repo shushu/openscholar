@@ -1,6 +1,0 @@
-name = "Control Panel: Layout"
-description = "A Control Panel for the layout of widgets on a page."
-core = 7.x
-package = "Control Panel"
-dependencies[] = cp
-dependencies[] = overlay_commands

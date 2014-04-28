@@ -1,5 +1,0 @@
-name = IQSS
-description = Specific styles for IQSS
-screenshot = screenshot.png
-
-css[] = iqss.css

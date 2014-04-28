@@ -1,4 +1,0 @@
-/* Overrides normal full-width text input to account for URL field prefix */
-.node-form #edit-path-alias {
-    width: auto;
-}

@@ -1,5 +1,0 @@
-name = Circles
-description = A version of the BigPic theme featuring a lot of circles
-screenshot = screenshot.png
-
-css[] = circles.css

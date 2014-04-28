@@ -1,5 +1,0 @@
-name = Quincy
-description = Quincy version of the cayley theme
-screenshot = screenshot.png
-
-css[] = quincy.css

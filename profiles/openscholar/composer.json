@@ -1,9 +1,0 @@
-{
-  "require": {
-    "cpliakas/git-wrapper": "1.0.0-RC1"
-  },
-  "minimum-stability": "dev",
-  "config": {
-    "vendor-dir": "libraries/git"
-  }
-}

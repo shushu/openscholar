@@ -1,5 +1,0 @@
-name = Green Modified Front
-description = A Green Version of the eloquent theme with a modified front page.
-screenshot = screenshot.png
-
-css[] = green_modfront.css

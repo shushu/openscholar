@@ -1,4 +1,0 @@
-name = "Overlay Commands"
-description = "Allows the use of AJAX Commands with the Overlay."
-core = 7.x
-dependencies[] = overlay

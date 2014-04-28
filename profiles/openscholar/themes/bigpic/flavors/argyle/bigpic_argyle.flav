@@ -1,5 +1,0 @@
-name = Argyle
-description = A version of the BigPic theme featuring an argyle pattern
-screenshot = screenshot.png
-
-css[] = argyle.css
