@@ -38,7 +38,6 @@ $dbHost 		= getEnvVar('ZS_DB_HOST');
 $dbUsername 	= getEnvVar('ZS_DB_USERNAME');
 $dbPassword 	= getEnvVar('ZS_DB_PASSWORD');
 $dbName 		= getEnvVar('ZS_DB_NAME');
-$tablePrefix 	= getEnvVar('ZS_TABLE_PREFIX');
 
 // Step1: update the settings file
 
@@ -67,7 +66,6 @@ replace_values($configFile, array(
 	'@ZEND_DB_USERNAME@' 		=> $dbUsername ,
 	'@ZEND_DB_PASSWORD@' 		=> $dbPassword ,
 	'@ZEND_DB_HOST@' 			=> $dbHost ,
-	'@ZEND_DB_TABLE_PREFIX@' 	=> $tablePrefix ,
 	'@ZEND_RANDOM_HASH@'     	=> generate_random_string(),
 ));
 

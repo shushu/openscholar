@@ -73,8 +73,5 @@
 		<parameter display="Drupal admin email" id="admin_email" readonly="false" required="true" type="email">
             <defaultvalue>admin@localhost.com</defaultvalue>
         </parameter>
-	<parameter display="Table prefix" id="table_prefix" readonly="false" required="true" type="string">
-            <defaultvalue></defaultvalue>
-        </parameter>
     </parameters>
 </package>
