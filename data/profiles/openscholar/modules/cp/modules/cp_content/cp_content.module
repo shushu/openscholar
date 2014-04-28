@@ -1,0 +1,154 @@
+<?php
+/**
+ * @file
+ * Code for the Control Panel: Content feature.
+ */
+
+include_once 'cp_content.features.inc';
+/**
+ * Implements hook_menu().
+ */
+function cp_content_menu() {
+  $items = array();
+
+  $items['cp/content/add'] = array(
+    'page callback' => 'cp_content_add_page',
+    'title' => 'Add New Content',
+    'type' => MENU_NORMAL_ITEM,
+    'access callback' => 'cp_content_add_page_access',
+    'file' => 'cp_content.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_view_pre_render().
+ *
+ * This function strip the HTML tags from a publication title. Only allowed
+ * tags are left.
+ *
+ * @param $view
+ *    The view to alter its output.
+ */
+function cp_content_views_pre_render(&$view) {
+  if ($view->name != 'cp_content') {
+    return;
+  }
+
+  if (empty($view->result)) {
+    return;
+  }
+
+  foreach ($view->result as $item) {
+    if ($item->node_type != 'biblio') {
+      continue;
+    }
+    $item->node_title = filter_xss($item->node_title, variable_get('html_title_allowed_elements', array('em', 'sub', 'sup')));
+  }
+}
+
+/**
+ * Access callback; For "Add new content" page.
+ *
+ * @return boolean
+ *   Returns TRUE if the user has the permission to create nodes of any type that
+ *   is currently active on the VSite, or if the user has the permission to create
+ *   new content types. Returns FALSE otherwise.
+ */
+function cp_content_add_page_access() {
+  if (user_access('administer content types')) {
+    // User has the permission to administer the content types, so grant access
+    // to the page anyway.
+    return TRUE;
+  }
+
+  // Access is TRUE if at least one of the OS bundles returns access TRUE.
+  $bundles = os_get_bundles();
+  foreach (array_keys($bundles) as $type) {
+    $item = menu_get_item('node/add/' . $type);
+    if ($item && $item['access']) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_views_data_alter()
+ */
+function cp_content_views_data_alter(&$data){
+  //Add Origname Field if it has not been added.
+  if(!isset($data['file_managed']['origname'])){
+    // filesize
+    $data['file_managed']['origname'] = array(
+      'title' => t('Original Name'),
+      'help' => t('The original name of the file.'),
+      'field' => array(
+        'handler' => 'views_handler_field_file_size',
+        'click sortable' => TRUE,
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_string',
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_string',
+      ),
+    );
+  }
+}
+
+/**
+ * Implements views_default_views_alter() for altering view settings.
+ */
+function cp_content_views_default_views_alter(&$views) {
+  if(variable_get('file_default_scheme', 'public') != 'private'){
+    return;
+  }
+
+  //Change the default CP Content view to display private files
+  if (isset($views['cp_files']->display->display_options['filters']['schema_type']['schema_type'])) {
+    //Remove the schema filter all it currently does is exclude private.
+    unset($views['cp_files']->display->display_options['filters']['schema_type']);
+  }
+}
+
+/**
+ * Implements hook_batch_alter().
+ *
+ * When selecting all the entities in the views including nodes from other pages
+ * we need to remove entities that don't belong to the current vsite.
+ */
+function cp_content_batch_alter(&$batch) {
+  if (!isset($batch['sets'][0]['finished'])) {
+    // Batch process didn't finish properly.
+    return;
+  }
+
+  if ($batch['sets'][0]['finished'] != '_views_bulk_operations_execute_finished') {
+    // Not a VBO action we need to alter.
+    return;
+  }
+
+  if (module_exists('vsite') && !$vsite = vsite_get_vsite()) {
+    return;
+  }
+
+  // Define an easy access to the arguments of the batch operation.
+  $arguments = &$batch['sets'][0]['operations'][0][1];
+  $entity_type = $arguments[1]->entityType;
+  $ids = array();
+
+  foreach ($arguments[0] as $entity_info) {
+    if (og_get_membership('node', $vsite->id, $entity_type, $entity_info['entity_id'])) {
+      $ids[] = $entity_info;
+    }
+  }
+
+  // Update the entities batch to the entities of the current vsite.
+  $arguments[0] = $ids;
+}

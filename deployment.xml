@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<package xmlns="http://www.zend.com/server/deployment-descriptor/1.0" version="1.0">
+    <name>openscholar</name>
+    <summary>OpenScholar - full featured solution for academic websites</summary>
+    <description>OpenScholar is a full featured solution for academic websites, used by major institutions including Harvard University, Princeton, Berkeley and others.</description>
+    <version>
+        <release>3.12</release>
+    </version>
+    <icon>data/misc/druplicon.png</icon>
+    <eula>LICENSE.txt</eula>
+    <appdir>data</appdir>
+    <scriptsdir>hook_scripts</scriptsdir>
+    <dependencies>
+        <required>
+            <php>
+                <min>5.2.5</min>
+            </php>
+            <extension>
+                <name>tokenizer</name>
+            </extension>
+            <extension>
+                <name>mysql</name>
+            </extension>
+            <extension>
+                <name>xml</name>
+            </extension>
+            <extension>
+                <name>gd</name>
+            </extension>
+            <extension>
+                <name>hash</name>
+            </extension>
+            <extension>
+                <name>json</name>
+            </extension>
+            <extension>
+                <name>pdo_mysql</name>
+            </extension>
+            <directive>
+                <name>safe_mode</name>
+                <equals>off</equals>
+            </directive>
+            <directive>
+                <name>memory_limit</name>
+                <min>256M</min>
+            </directive>
+            <directive>
+                <name>max_execution_time</name>
+                <min>300</min>
+            </directive>
+        </required>
+    </dependencies>
+    <parameters>
+        <parameter display="Site URL" id="site_url" readonly="false" required="true" type="string">
+            <defaultvalue>http://localhost/openscholar</defaultvalue>
+        </parameter>
+		<parameter display="Blog name" id="blog_name" readonly="false" required="true" type="string">
+            <defaultvalue>OpenScholar Demo</defaultvalue>
+        </parameter>
+        <parameter display="Database host" id="db_host" readonly="false" required="true" type="string">
+            <defaultvalue>localhost</defaultvalue>
+        </parameter>
+        <parameter display="Database username" id="db_username" readonly="false" required="true" type="string">
+            <defaultvalue>root</defaultvalue>
+        </parameter>
+        <parameter display="Database password" id="db_password" readonly="false" required="true" type="password" />
+        <parameter display="Database name" id="db_name" readonly="false" required="true" type="string">
+			<defaultvalue>openscholar</defaultvalue>
+		</parameter>
+		<parameter display="Drupal admin password" id="admin_password" readonly="false" required="true" type="password">
+            <defaultvalue></defaultvalue>
+        </parameter>
+		<parameter display="Drupal admin email" id="admin_email" readonly="false" required="true" type="email">
+            <defaultvalue>admin@localhost.com</defaultvalue>
+        </parameter>
+	<parameter display="Table prefix" id="table_prefix" readonly="false" required="true" type="string">
+            <defaultvalue></defaultvalue>
+        </parameter>
+    </parameters>
+</package>

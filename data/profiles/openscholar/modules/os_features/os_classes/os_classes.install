@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Revert OS classes fields.
+ */
+function os_classes_update_7000() {
+  features_revert(array('os_classes' => array('field_instance')));
+}

@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * Refreshes exported variables of the Links app
+ */
+function os_links_update_7000() {
+  $revert = array(
+    'os_links' => array(
+      'variable'
+    )
+  );
+
+  features_revert($revert);
+}
